@@ -1,0 +1,21 @@
+FROM docker.io/library/golang:latest AS builder
+
+LABEL maintainer="Htain Linn <htainlinnwork@gmail.com>"
+
+WORKDIR /go/src
+COPY todo-api.go .
+RUN export CGO_ENABLED=0 && \
+    go mod init todoapp/todo-api && \
+    go mod tidy && \
+    go build
+
+
+FROM docker.io/library/alpine:latest
+
+LABEL maintainer="Htain Linn <htainlinnwork@gmail.com>" \
+      description="Required Environment Variables: DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME"
+
+WORKDIR /app
+COPY --from=builder /go/src/todo-api /app
+
+CMD ["/app/todo-api"]
